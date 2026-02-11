@@ -1,10 +1,10 @@
 import { StyleSheet, View } from 'react-native';
 
 
-export default function HomeScreen() {
+export default function SettingScreen() {
   return (
     <View>
-      
+
     </View>
   );
 }

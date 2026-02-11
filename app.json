@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "debt-management",
-    "slug": "debt-management",
+    "name": "manh-app",
+    "slug": "manh-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -38,7 +38,8 @@
             "backgroundColor": "#000000"
           }
         }
-      ]
+      ],
+      "expo-sqlite"
     ],
     "experiments": {
       "typedRoutes": true,

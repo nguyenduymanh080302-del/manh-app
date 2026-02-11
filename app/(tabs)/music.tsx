@@ -1,11 +1,9 @@
 import { StyleSheet, View } from 'react-native';
 
 
-export default function HomeScreen() {
+export default function HistoryScreen() {
   return (
-    <View>
-      
-    </View>
+    <View></View>
   );
 }
 
