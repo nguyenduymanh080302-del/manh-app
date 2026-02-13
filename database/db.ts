@@ -22,7 +22,7 @@ export const initDatabase = async () => {
     await db.execAsync(`
       CREATE TABLE debts (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
+        name TEXT NOT NULL UNIQUE,
         total REAL DEFAULT 0,
         created_at TEXT DEFAULT CURRENT_TIMESTAMP
       );
@@ -48,4 +48,13 @@ export const initDatabase = async () => {
   }
 
   return db;
+};
+
+export const dropDatabase = async () => {
+  try {
+    await SQLite.deleteDatabaseAsync("manh_app.db");
+    console.log("🗑 Database deleted successfully");
+  } catch (error) {
+    console.log("❌ Delete DB error:", error);
+  }
 };

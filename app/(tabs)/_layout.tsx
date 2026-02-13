@@ -2,10 +2,12 @@ import { Tabs } from "expo-router";
 import React from "react";
 
 import { HapticTab } from "@/components/haptic-tab";
-import { IconSymbol } from "@/components/icons/icon-symbol";
-import { colors } from "@/constants/_colors";
+import { IconFontAwesome } from "@/components/icons/IconFontAwesome";
+import { useTheme } from "@react-navigation/native";
 
 export default function TabLayout() {
+
+  const { colors } = useTheme()
 
   return (
     <Tabs
@@ -20,8 +22,11 @@ export default function TabLayout() {
         name="index"
         options={{
           title: "Home",
+          tabBarLabelStyle: {
+            fontSize: 12
+          },
           tabBarIcon: ({ color }) => (
-            <IconSymbol name="home" size={28} color={color} />
+            <IconFontAwesome name="home" size={24} color={color} />
           ),
         }}
       />
@@ -30,8 +35,11 @@ export default function TabLayout() {
         name="music"
         options={{
           title: "Music",
+          tabBarLabelStyle: {
+            fontSize: 12
+          },
           tabBarIcon: ({ color }) => (
-            <IconSymbol name="music-note" size={28} color={color} />
+            <IconFontAwesome name="music" size={24} color={color} />
           ),
         }}
       />
@@ -40,8 +48,11 @@ export default function TabLayout() {
         name="debt"
         options={{
           title: "Debt",
+          tabBarLabelStyle: {
+            fontSize: 12
+          },
           tabBarIcon: ({ color }) => (
-            <IconSymbol name="credit-card" size={28} color={color} />
+            <IconFontAwesome name="credit-card" size={24} color={color} />
           ),
         }}
       />
@@ -51,8 +62,11 @@ export default function TabLayout() {
         name="setting"
         options={{
           title: "Settings",
+          tabBarLabelStyle: {
+            fontSize: 12
+          },
           tabBarIcon: ({ color }) => (
-            <IconSymbol name="settings" size={28} color={color} />
+            <IconFontAwesome name="gear" size={24} color={color} />
           ),
         }}
       />

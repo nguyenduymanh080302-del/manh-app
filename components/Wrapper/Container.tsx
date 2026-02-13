@@ -1,3 +1,4 @@
+import { useTheme } from '@react-navigation/native'
 import React from 'react'
 import { StyleProp, StyleSheet, ViewStyle } from 'react-native'
 import Animated from 'react-native-reanimated'
@@ -16,13 +17,17 @@ interface Props {
     borderWidth?: number
     borderColor?: string
     customStyle?: StyleProp<ViewStyle>
+    enabledShadow?: boolean
 }
 
 const Container = ({
     children, padding, margin,
     flex, direction, justify, align, gap,
-    backgroundColor, borderRadius, borderWidth, borderColor, customStyle
+    backgroundColor, borderRadius, borderWidth, borderColor, customStyle,
+    enabledShadow
 }: Props) => {
+
+    const { colors } = useTheme()
 
     const containerStyle = StyleSheet.flatten([
         padding !== undefined && { padding },
@@ -39,7 +44,17 @@ const Container = ({
     ]);
 
     return (
-        <Animated.View style={[containerStyle, customStyle]}>
+        <Animated.View style={[
+            containerStyle,
+            enabledShadow && {
+                shadowColor: colors.text,
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.2,
+                shadowRadius: 4,
+                elevation: 4
+            },
+            customStyle]}
+        >
             {children}
         </Animated.View>
     )
