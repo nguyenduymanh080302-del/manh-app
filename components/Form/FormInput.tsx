@@ -122,7 +122,7 @@ const FormInput = ({
                     style={[
                         { fontSize: 16, fontWeight: "500" },
                         { borderColor: textError ? Colors.dark.red : Colors.dark.lightGray },
-                        { color: colors.text, flex: 1, padding: 0 },
+                        { color: colors.text, padding: 0 },
                         inputStyle,
                     ]}
                 />

@@ -1,15 +1,15 @@
 import FormInput from '@/components/Form/FormInput'
+import { IconFontAwesome } from '@/components/icons/IconFontAwesome'
 import Container from '@/components/Wrapper/Container'
 import { Colors } from '@/constants/theme'
-import { createDebt } from '@/database/query'
+import { createDebt, updateDebt } from '@/database/query'
 import { useLoading } from '@/providers/LoadingProvider'
 import { Header } from '@react-navigation/elements'
 import { useTheme } from '@react-navigation/native'
-import { router } from 'expo-router'
+import { router, useLocalSearchParams } from 'expo-router'
 import React from 'react'
 import { Controller, useForm } from 'react-hook-form'
-import { Pressable, Text } from 'react-native'
-import Animated from 'react-native-reanimated'
+import { Pressable, ScrollView, Text, TouchableOpacity } from 'react-native'
 
 interface DebtUpsertProps {
     name: string;
@@ -18,24 +18,32 @@ interface DebtUpsertProps {
 
 const DebtUpsert = () => {
 
+    const { id, name, total } = useLocalSearchParams<{ id?: string, name?: string, total?: string }>();
+    const isEdit = Boolean(id);
     const { show, hide } = useLoading()
     const { colors } = useTheme()
     const { control, handleSubmit, formState: { errors } } = useForm<DebtUpsertProps>({
         defaultValues: {
-            name: "",
-            total: "",
-        }
+            name: name ?? "",
+            total: total ?? "",
+        },
     });
 
     const onSubmitUpsert = async (data: DebtUpsertProps) => {
         try {
             show();
-            const parsedTotal = typeof data.total === "string" ? Number(data.total.replace(/,/g, "")) : Number(data.total);
-            await createDebt(data.name, parsedTotal);
-            console.log("Debt created successfully");
+
+            const parsedTotal =
+                typeof data.total === "string"
+                    ? Number(data.total.replace(/,/g, ""))
+                    : Number(data.total);
+
+            if (isEdit) {
+                await updateDebt(Number(id), data.name, parsedTotal);
+            } else {
+                await createDebt(data.name, parsedTotal);
+            }
             router.back();
-        } catch (error) {
-            console.error("Error parsing total:", error);
         } finally {
             hide();
         }
@@ -45,9 +53,13 @@ const DebtUpsert = () => {
         <Container flex={1}>
             <Header
                 title='Create Debt'
-
+                headerLeft={() => (
+                    <TouchableOpacity onPress={() => router.back()} style={{ padding: 16 }}>
+                        <IconFontAwesome name="arrow-left" size={20} color={colors.text} />
+                    </TouchableOpacity>
+                )}
             />
-            <Animated.ScrollView
+            <ScrollView
                 contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 24, gap: 16 }}
             >
                 <Controller
@@ -88,7 +100,7 @@ const DebtUpsert = () => {
                 >
                     <Text style={{ color: Colors.dark.white, fontSize: 16, fontWeight: '600' }}>Save</Text>
                 </Pressable>
-            </Animated.ScrollView>
+            </ScrollView>
         </Container>
     )
 }

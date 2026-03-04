@@ -11,6 +11,10 @@ export default function DebtLayout() {
                 name="upsert"
                 options={{ headerShown: false }}
             />
+            <Stack.Screen
+                name="detail"
+                options={{ headerShown: false }}
+            />
         </Stack>
     );
 }

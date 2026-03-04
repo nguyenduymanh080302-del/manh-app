@@ -1,11 +1,12 @@
 import { useTheme } from '@react-navigation/native'
 import React from 'react'
-import { StyleProp, StyleSheet, ViewStyle } from 'react-native'
-import Animated from 'react-native-reanimated'
+import { StyleProp, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native'
 
 interface Props {
     children?: React.ReactNode,
     padding?: number
+    paddingVertical?: number
+    paddingHorizontal?: number
     margin?: number
     flex?: number
     direction?: 'row' | 'column'
@@ -18,19 +19,22 @@ interface Props {
     borderColor?: string
     customStyle?: StyleProp<ViewStyle>
     enabledShadow?: boolean
+    onPressContainer?: () => void
 }
 
 const Container = ({
-    children, padding, margin,
+    children, padding, paddingVertical, paddingHorizontal, margin,
     flex, direction, justify, align, gap,
     backgroundColor, borderRadius, borderWidth, borderColor, customStyle,
-    enabledShadow
+    enabledShadow, onPressContainer
 }: Props) => {
 
     const { colors } = useTheme()
 
     const containerStyle = StyleSheet.flatten([
         padding !== undefined && { padding },
+        paddingVertical !== undefined && { paddingVertical },
+        paddingHorizontal !== undefined && { paddingHorizontal },
         margin !== undefined && { margin },
         flex !== undefined && { flex },
         direction !== undefined && { flexDirection: direction },
@@ -44,7 +48,7 @@ const Container = ({
     ]);
 
     return (
-        <Animated.View style={[
+        <TouchableOpacity disabled={onPressContainer === undefined} activeOpacity={0.75} onPress={onPressContainer} style={[
             containerStyle,
             enabledShadow && {
                 shadowColor: colors.text,
@@ -56,7 +60,7 @@ const Container = ({
             customStyle]}
         >
             {children}
-        </Animated.View>
+        </TouchableOpacity>
     )
 }
 

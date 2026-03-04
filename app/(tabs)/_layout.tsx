@@ -1,7 +1,6 @@
 import { Tabs } from "expo-router";
 import React from "react";
 
-import { HapticTab } from "@/components/haptic-tab";
 import { IconFontAwesome } from "@/components/icons/IconFontAwesome";
 import { useTheme } from "@react-navigation/native";
 
@@ -14,7 +13,6 @@ export default function TabLayout() {
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: colors.primary,
-        tabBarButton: HapticTab,
       }}
     >
       {/* Home */}

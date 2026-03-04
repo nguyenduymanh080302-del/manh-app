@@ -1,7 +1,18 @@
-import { openDB } from "./db";
+import dayjs from "dayjs";
+import { initDatabase } from "./db";
+
+export const getDebts = async () => {
+    const db = await initDatabase();
+    return await db.getAllAsync("SELECT * FROM debts ORDER BY created_at DESC");
+}
+
+export const getDebtById = async (id: number) => {
+    const db = await initDatabase();
+    return await db.getFirstAsync("SELECT * FROM debts WHERE id = ?", [id]);
+}
 
 export const createDebt = async (name: string, total: number = 0) => {
-    const db = await openDB();
+    const db = await initDatabase();
 
     const cleanName = name.trim();
 
@@ -11,8 +22,8 @@ export const createDebt = async (name: string, total: number = 0) => {
 
     try {
         return await db.runAsync(
-            "INSERT INTO debts (name, total) VALUES (?, ?)",
-            [cleanName, total]
+            "INSERT INTO debts (name, total, created_at) VALUES (?, ?, ?)",
+            [cleanName, total, dayjs().format('YYYY-MM-DD HH:mm:ss')]
         );
 
     } catch (e: any) {
@@ -23,16 +34,44 @@ export const createDebt = async (name: string, total: number = 0) => {
     }
 };
 
+export const updateDebt = async (id: number, name: string, total: number) => {
+    const db = await initDatabase();
+
+    const cleanName = name.trim();
+
+    if (!cleanName) {
+        throw new Error("Debt name is required");
+    }
+
+    try {
+        return await db.runAsync(
+            "UPDATE debts SET name = ?, total = ? WHERE id = ?",
+            [cleanName, total, id]
+        );
+
+    } catch (e: any) {
+        if (e.message?.includes("UNIQUE")) {
+            throw new Error("Debt name already exists");
+        }
+        throw e;
+    }
+};
+
+export const deleteDebt = async (id: number) => {
+    const db = await initDatabase();
+    await db.runAsync("DELETE FROM debts WHERE id = ?", [id]);
+};
+
 // =======================================
 export const getCustomers = async () => {
-    const db = await openDB();
-    return await db.getAllAsync("SELECT * FROM customers ORDER BY name");
+    const db = await initDatabase();
+    return await db.getAllAsync("SELECT * FROM note ORDER BY name");
 };
 
 
 export const getCustomerById = async (id: number) => {
-    const db = await openDB();
-    return await db.getFirstAsync("SELECT * FROM customers WHERE id = ?", [id]);
+    const db = await initDatabase();
+    return await db.getFirstAsync("SELECT * FROM note WHERE id = ?", [id]);
 };
 
 
@@ -41,17 +80,17 @@ export const updateCustomer = async (
     name: string,
     phone?: string
 ) => {
-    const db = await openDB();
+    const db = await initDatabase();
     await db.runAsync(
-        "UPDATE customers SET name = ?, phone = ? WHERE id = ?",
+        "UPDATE note SET name = ?, phone = ? WHERE id = ?",
         [name, phone ?? null, id]
     );
 };
 
 
 export const deleteCustomer = async (id: number) => {
-    const db = await openDB();
-    await db.runAsync("DELETE FROM customers WHERE id = ?", [id]);
+    const db = await initDatabase();
+    await db.runAsync("DELETE FROM note WHERE id = ?", [id]);
 };
 
 
@@ -60,37 +99,36 @@ export const deleteCustomer = async (id: number) => {
 // =======================================
 export const createRecord = async (
     debtId: number,
-    customerId: number,
+    note: string,
     amount: number
 ) => {
-    const db = await openDB();
-
+    const db = await initDatabase();
 
     await db.execAsync("BEGIN TRANSACTION;");
+    try {
+        await db.runAsync(
+            "INSERT INTO records (debt_id, note, amount) VALUES (?, ?, ?)",
+            [debtId, note || null, amount]
+        );
 
+        await db.runAsync(
+            "UPDATE debts SET total = total + ? WHERE id = ?",
+            [amount, debtId]
+        );
 
-    await db.runAsync(
-        "INSERT INTO records (debt_id, customer_id, amount) VALUES (?, ?, ?)",
-        [debtId, customerId, amount]
-    );
-
-
-    await db.runAsync(
-        "UPDATE debts SET total = total + ? WHERE id = ?",
-        [amount, debtId]
-    );
-
-
-    await db.execAsync("COMMIT;");
+        await db.execAsync("COMMIT;");
+    } catch (e) {
+        await db.execAsync("ROLLBACK;");
+        throw e;
+    }
 };
 
 
 export const getRecordsByDebt = async (debtId: number) => {
-    const db = await openDB();
+    const db = await initDatabase();
     return await db.getAllAsync(
-        `SELECT r.id, r.amount, r.datetime, c.name AS customer
+        `SELECT r.id, r.amount, r.datetime, r.note
             FROM records r
-            JOIN customers c ON r.customer_id = c.id
             WHERE r.debt_id = ?
             ORDER BY r.datetime DESC`,
         [debtId]
@@ -99,7 +137,7 @@ export const getRecordsByDebt = async (debtId: number) => {
 
 
 export const deleteRecord = async (id: number) => {
-    const db = await openDB();
+    const db = await initDatabase();
 
 
     const record = await db.getFirstAsync<{
@@ -121,7 +159,6 @@ export const deleteRecord = async (id: number) => {
         "UPDATE debts SET total = total - ? WHERE id = ?",
         [record.amount, record.debt_id]
     );
-
 
     await db.execAsync("COMMIT;");
 };
